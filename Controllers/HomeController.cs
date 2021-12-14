@@ -21,70 +21,82 @@ namespace chefsdishes.Controllers
         }
 
 
-// ____________________
-// render view all chefs here
-// __________________
+        // ____________________
+        // render view all chefs here
+        // __________________
         public IActionResult Index()
         {
             ViewBag.AllChefs = _context.Chefs.OrderByDescending(d => d.CreatedAt).Include(a => a.myDishes).ToList();
             return View();
         }
 
-// ____________________
-//render view chef's dishes here
-// __________________
+        // ____________________
+        //render view chef's dishes here
+        // __________________
         [HttpGet("viewchefsDishes")]
         public IActionResult ViewDishes()
         {
             ViewBag.AllDishes = _context.Dishes.OrderByDescending(d => d.CreatedAt).Include(b => b.myChef).ToList();
             return View();
         }
-// ____________________
-// render view add chef page
-// __________________
+        // ____________________
+        // render view add chef page
+        // __________________
         [HttpGet("addchef")]
         public IActionResult AddChef()
         {
             return View();
         }
-// ____________________
-// create new chef info here
-// __________________
+        // ____________________
+        // create new chef info here
+        // __________________
         [HttpPost("newChef")]
         public IActionResult newChef(Chef addedChef)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                _context.Add(addedChef);
-                _context.SaveChanges();
-                return RedirectToAction("Index");
-            } else {
-                return View ("AddChef");
+                if (addedChef.dob < DateTime.Now)
+                {
+                    _context.Add(addedChef);
+                    _context.SaveChanges();
+                    return RedirectToAction("Index");
+                }
+                else
+                {
+                    ModelState.AddModelError("dob", "This date should be in the past.");
+                    return View("AddChef");
+                }
+            }
+            else
+            {
+                return View("AddChef");
             }
         }
-// ____________________
-// render view add dish page
-// __________________
+        // ____________________
+        // render view add dish page
+        // __________________
         [HttpGet("addDish")]
         public IActionResult AddDish()
         {
             ViewBag.AllChefs = _context.Chefs.Include(a => a.myDishes).ToList();
             return View();
         }
-// ____________________
-// create new dish info here
-// __________________
+        // ____________________
+        // create new dish info here
+        // __________________
         [HttpPost("addnewDish")]
         public IActionResult newDish(Dish addedDish)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 _context.Add(addedDish);
                 _context.SaveChanges();
                 return RedirectToAction("ViewDishes");
-            } else {
+            }
+            else
+            {
                 ViewBag.AllChefs = _context.Chefs.Include(a => a.myDishes).ToList();
-                return View ("AddDish");
+                return View("AddDish");
             }
         }
 
